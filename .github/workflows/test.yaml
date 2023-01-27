@@ -20,6 +20,12 @@ jobs:
       - name: Test with Go ${{ matrix.go-version }}
         run: go test -json > TestResults-${{ matrix.go-version }}.json
 
+      # To get git to work in the tests
+      - name: Set git config
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "test@test.com"
+
       - name: Upload Go test results for ${{ matrix.go-version }}
         if: always()
         uses: actions/upload-artifact@v3
