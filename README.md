@@ -14,8 +14,8 @@ Check out the [releases](https://github.com/survivorbat/go-bumpy/releases) or us
 
 ## 📋 Usage
 
-`go-bumpy [-minor] .`
+`bumpy [-minor] .`
 
 ## 🔭 Plans
 
-Not much here yet
+Add option for auto pushing the new tag to the remote.
