@@ -25,7 +25,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: "https://dl.google.com/go/go1.19.0.linux-amd64.tar.gz"
+          goversion: "https://dl.google.com/go/go1.19.5.linux-amd64.tar.gz"
           project_path: "."
           binary_name: "bumpy"
           extra_files: LICENSE README.md
