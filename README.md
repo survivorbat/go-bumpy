@@ -18,4 +18,5 @@ Check out the [releases](https://github.com/survivorbat/go-bumpy/releases) or us
 
 ## 🔭 Plans
 
-Add option for auto pushing the new tag to the remote.
+- Add option for auto pushing the new tag to the remote.
+- New tag to stdout
