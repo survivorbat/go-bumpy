@@ -1,4 +1,4 @@
-package main
+package bumpy
 
 import (
 	"fmt"
@@ -14,10 +14,10 @@ import (
 	"strings"
 )
 
-type bumpType int
+type BumpType int
 
-const bumpTypeMinor bumpType = 1
-const bumpTypePatch bumpType = 2
+const BumpTypeMinor BumpType = 1
+const BumpTypePatch BumpType = 2
 
 // getTags returns a list of semver tags in the repository, these versions are ordered
 // from lowest to highest
@@ -84,12 +84,12 @@ func getModuleVersion(directory string) (string, error) {
 	return "", nil
 }
 
-// bump creates a new tag for the given repository, the version identifier is determined by:
+// Bump creates a new tag for the given repository, the version identifier is determined by:
 // - The current version of the module, as defined in the go.mod file (the v2 or v3 part)
 // - The latest tag in the repository
-// - The bump type (minor or patch)
+// - The Bump type (minor or patch)
 // - The default of v0.0.1 if there are no tags or go.mod files
-func bump(directory string, bumpType bumpType) error {
+func Bump(directory string, bumpType BumpType) error {
 	repo, err := git.PlainOpen(directory)
 	if err != nil {
 		log.Printf("Failed to open repository '%s': %s\n", directory, err.Error())
@@ -138,10 +138,10 @@ func bump(directory string, bumpType bumpType) error {
 	}
 
 	switch bumpType {
-	case bumpTypeMinor:
+	case BumpTypeMinor:
 		newTag := latestTag.IncMinor()
 		latestTag = &newTag
-	case bumpTypePatch:
+	case BumpTypePatch:
 		newTag := latestTag.IncPatch()
 		latestTag = &newTag
 	}

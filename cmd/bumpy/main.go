@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/survivorbat/go-bumpy"
 	"log"
 )
 
@@ -15,16 +16,16 @@ func main() {
 		log.Fatalln("No directory specified")
 	}
 
-	bumpType := bumpTypePatch
+	bumpType := bumpy.BumpTypePatch
 
 	if *minor {
-		bumpType = bumpTypeMinor
+		bumpType = bumpy.BumpTypeMinor
 		log.Printf("Bumping minor version in %s", directory)
 	} else {
 		log.Printf("Bumping patch version in %s", directory)
 	}
 
-	if err := bump(directory, bumpType); err != nil {
+	if err := bumpy.Bump(directory, bumpType); err != nil {
 		log.Fatalln(err.Error())
 	}
 }

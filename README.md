@@ -10,7 +10,7 @@ reads the version from your `go.mod` file to determine what the major version of
 
 ## ⬇️ Installation
 
-Check out the [releases](https://github.com/survivorbat/go-bumpy/releases).
+Check out the [releases](https://github.com/survivorbat/go-bumpy/releases) or use `go install github.com/survivorbat/go-bumpy/cmd/bumpy`.
 
 ## 📋 Usage
 

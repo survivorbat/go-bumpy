@@ -1,4 +1,4 @@
-package main
+package bumpy
 
 import (
 	"fmt"
@@ -58,54 +58,54 @@ func TestBump_ReturnsExpectedVersionWithModuleFile(t *testing.T) {
 	tests := map[string]struct {
 		existing    []string
 		moduleName  string
-		versionBump bumpType
+		versionBump BumpType
 		expected    string
 	}{
 		"no tags, no module, patch": {
 			existing:    []string{},
 			expected:    "v0.0.1",
-			versionBump: bumpTypePatch,
+			versionBump: BumpTypePatch,
 		},
 		"no tags, a module, patch": {
 			existing:    []string{},
 			moduleName:  "github.com/foobar/vaz",
 			expected:    "v0.0.1",
-			versionBump: bumpTypePatch,
+			versionBump: BumpTypePatch,
 		},
 		"no tags, a module version, patch": {
 			existing:    []string{},
 			moduleName:  "github.com/survivorbat/vv-bumpy/v5",
 			expected:    "v5.0.1",
-			versionBump: bumpTypePatch,
+			versionBump: BumpTypePatch,
 		},
 		"multiple tags, no module version, patch": {
 			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3"},
 			expected:    "v4.0.4",
-			versionBump: bumpTypePatch,
+			versionBump: BumpTypePatch,
 		},
 		"multiple tags, a module version, patch": {
 			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3", "v5.0.1", "v6.4.2"},
 			moduleName:  "github.com/survivorbat/go-bumpy/v5",
 			expected:    "v5.0.2",
-			versionBump: bumpTypePatch,
+			versionBump: BumpTypePatch,
 		},
 		"multiple tags, a module version, minor": {
 			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3", "v5.0.1", "v6.4.2"},
 			moduleName:  "github.com/survivorbat/go-bumpy/v5",
 			expected:    "v5.1.0",
-			versionBump: bumpTypeMinor,
+			versionBump: BumpTypeMinor,
 		},
 		"multiple tags, a new module version, patch": {
 			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3", "v5.0.1", "v6.4.2"},
 			moduleName:  "github.com/survivorbat/go-bumpy/v7",
 			expected:    "v7.0.1",
-			versionBump: bumpTypePatch,
+			versionBump: BumpTypePatch,
 		},
 		"multiple tags, a new module version, minor": {
 			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3", "v5.0.1", "v6.4.2"},
 			moduleName:  "github.com/survivorbat/go-bumpy/v7",
 			expected:    "v7.1.0",
-			versionBump: bumpTypeMinor,
+			versionBump: BumpTypeMinor,
 		},
 	}
 
@@ -124,7 +124,7 @@ func TestBump_ReturnsExpectedVersionWithModuleFile(t *testing.T) {
 			}
 
 			// Act
-			err := bump(directory, testData.versionBump)
+			err := Bump(directory, testData.versionBump)
 
 			// Assert
 			assert.NoError(t, err)
