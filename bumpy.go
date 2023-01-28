@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Masterminds/semver"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"golang.org/x/mod/modfile"
 	"log"
@@ -89,33 +90,36 @@ func getModuleVersion(directory string) (string, error) {
 // - The latest tag in the repository
 // - The Bump type (minor or patch)
 // - The default of v0.0.1 if there are no tags or go.mod files
-func Bump(directory string, bumpType BumpType) error {
+func Bump(directory string, bumpType BumpType, pushRemote string) (string, error) {
 	repo, err := git.PlainOpen(directory)
 	if err != nil {
 		log.Printf("Failed to open repository '%s': %s\n", directory, err.Error())
-		return err
+		return "", err
 	}
 
 	tags, err := getTags(repo)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	moduleVersion, err := getModuleVersion(directory)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	var latestTag *semver.Version
+	var shouldBump = true
 
 	switch {
 	// If we have zero data, we're starting from scratch and should use v0.0.0
 	case len(tags) == 0 && moduleVersion == "":
 		latestTag = semver.MustParse("v0.0.0")
+		shouldBump = false
 
 	// If we have zero data, but we have a module version, we should use that with two zeros
 	case len(tags) == 0 && moduleVersion != "":
 		latestTag = semver.MustParse(fmt.Sprintf("v%s.0.0", moduleVersion))
+		shouldBump = false
 
 	// If we have tags, but no module version, we should use the latest tag
 	case len(tags) > 0 && moduleVersion == "":
@@ -134,22 +138,26 @@ func Bump(directory string, bumpType BumpType) error {
 			latestTag = filteredTags[len(filteredTags)-1]
 		} else {
 			latestTag = semver.MustParse(fmt.Sprintf("v%s.0.0", moduleVersion))
+			shouldBump = false
 		}
 	}
 
-	switch bumpType {
-	case BumpTypeMinor:
-		newTag := latestTag.IncMinor()
-		latestTag = &newTag
-	case BumpTypePatch:
-		newTag := latestTag.IncPatch()
-		latestTag = &newTag
+	// We should bump the version if we have a tag, or if we have an existing module version
+	if shouldBump {
+		switch bumpType {
+		case BumpTypeMinor:
+			newTag := latestTag.IncMinor()
+			latestTag = &newTag
+		case BumpTypePatch:
+			newTag := latestTag.IncPatch()
+			latestTag = &newTag
+		}
 	}
 
 	headRef, err := repo.Head()
 	if err != nil {
 		log.Printf("Failed to get HEAD: %s\n", err.Error())
-		return err
+		return "", err
 	}
 
 	newTag := fmt.Sprintf("v%s", latestTag.String())
@@ -157,8 +165,23 @@ func Bump(directory string, bumpType BumpType) error {
 	log.Printf("Creating tag %s\n", newTag)
 	if _, err := repo.CreateTag(newTag, headRef.Hash(), nil); err != nil {
 		log.Printf("Failed to create tag: %s\n", err.Error())
-		return err
+		return "", err
 	}
 
-	return nil
+	if pushRemote != "" {
+		ref := fmt.Sprintf("refs/tags/%s:refs/tags/%s", newTag, newTag)
+		options := &git.PushOptions{
+			RemoteName: pushRemote,
+			RefSpecs: []config.RefSpec{
+				config.RefSpec(ref),
+			},
+		}
+
+		log.Printf("Pushing tag %s to %s\n", newTag, pushRemote)
+		if err := repo.Push(options); err != nil {
+			log.Printf("Failed to pushRemote tag: %s\n", err.Error())
+		}
+	}
+
+	return newTag, nil
 }
