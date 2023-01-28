@@ -12,7 +12,7 @@ It is also capable of pushing the new tag to your remote repository.
 
 ## ⬇️ Installation
 
-`go install github.com/survivorbat/go-bumpy/cmd/bumpy`
+`go install github.com/survivorbat/go-bumpy/cmd/bumpy@latest`
 
 Or check out the [releases](https://github.com/survivorbat/go-bumpy/releases).
 
