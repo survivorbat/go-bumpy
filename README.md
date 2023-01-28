@@ -35,6 +35,7 @@ It will output the new tag name to stdout and logging to stderr.
 | None          | v2.5.0     | v2.5.1 |
 | v3            | None       | v3.0.0 |
 | v3            | v3.2.0     | v3.2.1 |
+| v3            | v5.4.3     | v3.0.0 |
 
 ## 🔭 Plans
 
