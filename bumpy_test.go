@@ -125,7 +125,94 @@ func TestBump_ReturnsExpectedVersionWithModuleFile(t *testing.T) {
 			}
 
 			// Act
-			result, err := Bump(directory, testData.versionBump, "")
+			result, err := Bump(directory, directory, testData.versionBump, "")
+
+			// Assert
+			assert.NoError(t, err)
+			assert.Equal(t, testData.expected, result)
+
+			_, err = repo.Tag(testData.expected)
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestBump_ReturnsExpectedVersionWithModuleFileInADifferentDirectory(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		existing    []string
+		moduleName  string
+		versionBump BumpType
+		expected    string
+	}{
+		"no tags, no module, patch": {
+			existing:    []string{},
+			expected:    "v0.0.0",
+			versionBump: BumpTypePatch,
+		},
+		"no tags, a module, patch": {
+			existing:    []string{},
+			moduleName:  "github.com/foobar/vaz",
+			expected:    "v0.0.0",
+			versionBump: BumpTypePatch,
+		},
+		"no tags, a module version, patch": {
+			existing:    []string{},
+			moduleName:  "github.com/survivorbat/vv-bumpy/v5",
+			expected:    "v5.0.0",
+			versionBump: BumpTypePatch,
+		},
+		"multiple tags, no module version, patch": {
+			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3"},
+			expected:    "v4.0.4",
+			versionBump: BumpTypePatch,
+		},
+		"multiple tags, a module version, patch": {
+			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3", "v5.0.1", "v6.4.2"},
+			moduleName:  "github.com/survivorbat/go-bumpy/v5",
+			expected:    "v5.0.2",
+			versionBump: BumpTypePatch,
+		},
+		"multiple tags, a module version, minor": {
+			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3", "v5.0.1", "v6.4.2"},
+			moduleName:  "github.com/survivorbat/go-bumpy/v5",
+			expected:    "v5.1.0",
+			versionBump: BumpTypeMinor,
+		},
+		"multiple tags, a new module version, patch": {
+			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3", "v5.0.1", "v6.4.2"},
+			moduleName:  "github.com/survivorbat/go-bumpy/v7",
+			expected:    "v7.0.0",
+			versionBump: BumpTypePatch,
+		},
+		"multiple tags, a new module version, minor": {
+			existing:    []string{"v1.0.0", "v2.0.1", "v3.0.2", "v4.0.3", "v5.0.1", "v6.4.2"},
+			moduleName:  "github.com/survivorbat/go-bumpy/v7",
+			expected:    "v7.0.0",
+			versionBump: BumpTypeMinor,
+		},
+	}
+
+	for name, testData := range tests {
+		testData := testData
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			directory := path.Join(t.TempDir(), "test")
+			repo := setupRepo(t, directory, testData.existing)
+
+			module := path.Join(t.TempDir(), "module")
+			err := os.Mkdir(module, 0755)
+			fatalIf(t, err)
+
+			if testData.moduleName != "" {
+				moduleContents := fmt.Sprintf("module %s\n\ngo 1.19\n", testData.moduleName)
+				err := os.WriteFile(path.Join(module, "go.mod"), []byte(moduleContents), 0644)
+				fatalIf(t, err)
+			}
+
+			// Act
+			result, err := Bump(directory, module, testData.versionBump, "")
 
 			// Assert
 			assert.NoError(t, err)
@@ -162,7 +249,7 @@ func TestBump_PushesToRemoteCorrectly(t *testing.T) {
 	fatalIf(t, err)
 
 	// Act
-	result, err := Bump(localDirectory, BumpTypeMinor, "origin")
+	result, err := Bump(localDirectory, localDirectory, BumpTypeMinor, "origin")
 
 	// Assert
 	assert.NoError(t, err)

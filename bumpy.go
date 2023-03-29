@@ -61,7 +61,7 @@ func getModuleVersion(directory string) (string, error) {
 	// because it's not an error if there is no go.mod file
 	fileContents, err := os.ReadFile(expectedModPath)
 	if err != nil {
-		// There is no go.mod file, which is allowed
+		fmt.Printf("Not able to find %s, ignoring", expectedModPath)
 		return "", nil
 	}
 
@@ -89,8 +89,8 @@ func getModuleVersion(directory string) (string, error) {
 // - The current version of the module, as defined in the go.mod file (the v2 or v3 part)
 // - The latest tag in the repository
 // - The Bump type (minor or patch)
-// - The default of v0.0.1 if there are no tags or go.mod files
-func Bump(directory string, bumpType BumpType, pushRemote string) (string, error) {
+// - The default of v0.0.0 if there are no tags or go.mod files
+func Bump(directory string, module string, bumpType BumpType, pushRemote string) (string, error) {
 	repo, err := git.PlainOpen(directory)
 	if err != nil {
 		log.Printf("Failed to open repository '%s': %s\n", directory, err.Error())
@@ -102,7 +102,7 @@ func Bump(directory string, bumpType BumpType, pushRemote string) (string, error
 		return "", err
 	}
 
-	moduleVersion, err := getModuleVersion(directory)
+	moduleVersion, err := getModuleVersion(module)
 	if err != nil {
 		return "", err
 	}

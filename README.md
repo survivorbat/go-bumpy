@@ -18,7 +18,7 @@ Or check out the [releases](https://github.com/survivorbat/go-bumpy/releases).
 
 ## 📋 Usage
 
-`bumpy [-minor] [-push="origin"] <directory>`
+`bumpy [-minor] [-module="./src"] [-push="origin"] <repository directory>`
 
 It will output the new tag name to stdout and logging to stderr.
 
@@ -26,6 +26,7 @@ It will output the new tag name to stdout and logging to stderr.
 
 - `-minor` Bump the minor version instead of the patch version
 - `-push` Push the new tag to the specified remote. If not specified, the tag will not be pushed.
+- `-module` If your `go.mod` is not in the root of the directory, you can specify the path here
 
 ### Examples
 
