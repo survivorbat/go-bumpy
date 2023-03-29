@@ -61,7 +61,7 @@ func getModuleVersion(directory string) (string, error) {
 	// because it's not an error if there is no go.mod file
 	fileContents, err := os.ReadFile(expectedModPath)
 	if err != nil {
-		fmt.Printf("Not able to find %s, ignoring", expectedModPath)
+		log.Printf("Not able to find %s, ignoring", expectedModPath)
 		return "", nil
 	}
 
