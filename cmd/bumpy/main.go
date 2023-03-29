@@ -12,6 +12,7 @@ func main() {
 	minor := flag.Bool("minor", false, "Whether to bump the minor version, instead of the patch")
 	push := flag.String("push", "", "Whether to push the new tag to a remote, and if so, which one")
 	module := flag.String("module", "", "If the go module is not in the repository's root directory, you can specify the path here")
+	prefix := flag.String("prefix", "", "Prefix the result tag and strip the prefix from the existing tags when searching")
 	flag.Parse()
 
 	directory := flag.Arg(0)
@@ -32,7 +33,15 @@ func main() {
 		log.Printf("Bumping patch version in %s", directory)
 	}
 
-	newTag, err := bumpy.Bump(directory, *module, bumpType, *push)
+	config := bumpy.BumpConfig{
+		Prefix:          *prefix,
+		Directory:       directory,
+		ModuleDirectory: *module,
+		Type:            bumpType,
+		RemotePush:      *push,
+	}
+
+	newTag, err := bumpy.Bump(config)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

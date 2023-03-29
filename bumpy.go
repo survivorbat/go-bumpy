@@ -22,7 +22,7 @@ const BumpTypePatch BumpType = 2
 
 // getTags returns a list of semver tags in the repository, these versions are ordered
 // from lowest to highest
-func getTags(repo *git.Repository) (semver.Collection, error) {
+func getTags(prefix string, repo *git.Repository) (semver.Collection, error) {
 	tags, err := repo.Tags()
 	if err != nil {
 		log.Printf("Failed to get tags: %s\n", err.Error())
@@ -33,6 +33,13 @@ func getTags(repo *git.Repository) (semver.Collection, error) {
 
 	_ = tags.ForEach(func(tag *plumbing.Reference) error {
 		tagName := tag.Name().Short()
+
+		// Skip anything that does not contain the prefix
+		if !strings.Contains(tagName, prefix) {
+			return nil
+		}
+
+		tagName = strings.Replace(tagName, prefix, "", 1)
 
 		result, err := semver.NewVersion(tagName)
 		if err != nil {
@@ -85,24 +92,32 @@ func getModuleVersion(directory string) (string, error) {
 	return "", nil
 }
 
+type BumpConfig struct {
+	Prefix          string
+	Directory       string
+	ModuleDirectory string
+	Type            BumpType
+	RemotePush      string
+}
+
 // Bump creates a new tag for the given repository, the version identifier is determined by:
 // - The current version of the module, as defined in the go.mod file (the v2 or v3 part)
 // - The latest tag in the repository
 // - The Bump type (minor or patch)
 // - The default of v0.0.0 if there are no tags or go.mod files
-func Bump(directory string, module string, bumpType BumpType, pushRemote string) (string, error) {
-	repo, err := git.PlainOpen(directory)
+func Bump(bumpConfig BumpConfig) (string, error) {
+	repo, err := git.PlainOpen(bumpConfig.Directory)
 	if err != nil {
-		log.Printf("Failed to open repository '%s': %s\n", directory, err.Error())
+		log.Printf("Failed to open repository '%s': %s\n", bumpConfig.Directory, err.Error())
 		return "", err
 	}
 
-	tags, err := getTags(repo)
+	tags, err := getTags(bumpConfig.Prefix, repo)
 	if err != nil {
 		return "", err
 	}
 
-	moduleVersion, err := getModuleVersion(module)
+	moduleVersion, err := getModuleVersion(bumpConfig.ModuleDirectory)
 	if err != nil {
 		return "", err
 	}
@@ -144,7 +159,7 @@ func Bump(directory string, module string, bumpType BumpType, pushRemote string)
 
 	// We should bump the version if we have a tag, or if we have an existing module version
 	if shouldBump {
-		switch bumpType {
+		switch bumpConfig.Type {
 		case BumpTypeMinor:
 			newTag := latestTag.IncMinor()
 			latestTag = &newTag
@@ -160,7 +175,7 @@ func Bump(directory string, module string, bumpType BumpType, pushRemote string)
 		return "", err
 	}
 
-	newTag := fmt.Sprintf("v%s", latestTag.String())
+	newTag := fmt.Sprintf("%sv%s", bumpConfig.Prefix, latestTag.String())
 
 	log.Printf("Creating tag %s\n", newTag)
 	if _, err := repo.CreateTag(newTag, headRef.Hash(), nil); err != nil {
@@ -168,16 +183,16 @@ func Bump(directory string, module string, bumpType BumpType, pushRemote string)
 		return "", err
 	}
 
-	if pushRemote != "" {
+	if bumpConfig.RemotePush != "" {
 		ref := fmt.Sprintf("refs/tags/%s:refs/tags/%s", newTag, newTag)
 		options := &git.PushOptions{
-			RemoteName: pushRemote,
+			RemoteName: bumpConfig.RemotePush,
 			RefSpecs: []config.RefSpec{
 				config.RefSpec(ref),
 			},
 		}
 
-		log.Printf("Pushing tag %s to %s\n", newTag, pushRemote)
+		log.Printf("Pushing tag %s to %s\n", newTag, bumpConfig.RemotePush)
 		if err := repo.Push(options); err != nil {
 			log.Printf("Failed to pushRemote tag: %s\n", err.Error())
 		}
