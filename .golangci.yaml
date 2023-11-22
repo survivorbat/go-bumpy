@@ -1,0 +1,91 @@
+issues:
+  exclude-rules:
+    - path: (.+)_test.go
+      linters:
+        - goconst
+        - nilnil
+        - goerr113
+        - ireturn
+        - bodyclose
+
+linters-settings:
+  nlreturn:
+    # Allow 2 lines max to have a return statement without a new line before it
+    block-size: 3
+
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - cyclop
+    - decorder
+    - dogsled
+    - dupword
+    - durationcheck
+    - errcheck
+    - errname
+    - errorlint
+    - execinquery
+    - exhaustive
+    - exportloopref
+    - forbidigo
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - goerr113
+    - gofmt
+    - gofumpt
+    - goheader
+    - goimports
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - gosmopolitan
+    - govet
+    - grouper
+    - importas
+    - ineffassign
+    - interfacebloat
+    - ireturn
+    - loggercheck
+    - maintidx
+    - makezero
+    - mirror
+    - misspell
+    - musttag
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnil
+    - nlreturn
+    - nonamedreturns
+    - nosprintfhostport
+    - paralleltest
+    - prealloc
+    - predeclared
+    - promlinter
+    - reassign
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - tenv
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+    - zerologlint

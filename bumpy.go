@@ -2,26 +2,29 @@ package bumpy
 
 import (
 	"fmt"
-	"github.com/Masterminds/semver"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/config"
-	"github.com/go-git/go-git/v5/plumbing"
-	"golang.org/x/mod/modfile"
 	"log"
 	"os"
 	"path"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/Masterminds/semver"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
+	"golang.org/x/mod/modfile"
 )
 
 type BumpType int
 
-const BumpTypeMinor BumpType = 1
-const BumpTypePatch BumpType = 2
+const (
+	BumpTypeMinor BumpType = 1
+	BumpTypePatch BumpType = 2
+)
 
 // getTags returns a list of semver tags in the repository, these versions are ordered
-// from lowest to highest
+// from lowest to highest. Errors in tag names are ignored.
 func getTags(prefix string, repo *git.Repository) (semver.Collection, error) {
 	tags, err := repo.Tags()
 	if err != nil {
@@ -43,10 +46,12 @@ func getTags(prefix string, repo *git.Repository) (semver.Collection, error) {
 
 		result, err := semver.NewVersion(tagName)
 		if err != nil {
+			//nolint:nilerr // We allow it, since we want to skip empty tags.
 			return nil
 		}
 
 		resultTags = append(resultTags, result)
+
 		return nil
 	})
 
@@ -69,6 +74,7 @@ func getModuleVersion(directory string) (string, error) {
 	fileContents, err := os.ReadFile(expectedModPath)
 	if err != nil {
 		log.Printf("Not able to find %s, ignoring", expectedModPath)
+		//nolint:nilerr // We allow it, since it's allowed to not exist
 		return "", nil
 	}
 
@@ -85,7 +91,7 @@ func getModuleVersion(directory string) (string, error) {
 	versionTag := splitPath[len(splitPath)-1]
 
 	// Check if the final segment is the version tag, if not, return an empty string
-	if moduleVersionTag.Match([]byte(versionTag)) {
+	if moduleVersionTag.MatchString(versionTag) {
 		return versionTag[1:], nil
 	}
 
@@ -105,6 +111,8 @@ type BumpConfig struct {
 // - The latest tag in the repository
 // - The Bump type (minor or patch)
 // - The default of v0.0.0 if there are no tags or go.mod files
+//
+//nolint:cyclop // I'll allow it
 func Bump(bumpConfig BumpConfig) (string, error) {
 	repo, err := git.PlainOpen(bumpConfig.Directory)
 	if err != nil {
@@ -123,7 +131,7 @@ func Bump(bumpConfig BumpConfig) (string, error) {
 	}
 
 	var latestTag *semver.Version
-	var shouldBump = true
+	shouldBump := true
 
 	switch {
 	// If we have zero data, we're starting from scratch and should use v0.0.0

@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/survivorbat/go-bumpy"
 	"log"
+
+	"github.com/survivorbat/go-bumpy"
 )
 
 func main() {
@@ -46,5 +47,6 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	//nolint:forbidigo // We wwant to output here
 	fmt.Println(newTag)
 }

@@ -2,12 +2,13 @@ package bumpy
 
 import (
 	"fmt"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/config"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/stretchr/testify/assert"
 )
 
 func fatalIf(t *testing.T, err error) {
@@ -18,7 +19,9 @@ func fatalIf(t *testing.T, err error) {
 }
 
 func setupRepo(t *testing.T, directory string, tags []string) *git.Repository {
-	err := os.Mkdir(directory, 0755)
+	t.Helper()
+
+	err := os.Mkdir(directory, 0o755)
 	fatalIf(t, err)
 
 	repo, err := git.PlainInit(directory, false)
@@ -26,7 +29,7 @@ func setupRepo(t *testing.T, directory string, tags []string) *git.Repository {
 
 	fullPath := path.Join(directory, "README.md")
 
-	err = os.WriteFile(fullPath, []byte("Hello world"), 0644)
+	err = os.WriteFile(fullPath, []byte("Hello world"), 0o600)
 	fatalIf(t, err)
 
 	tree, err := repo.Worktree()
@@ -120,7 +123,7 @@ func TestBump_ReturnsExpectedVersionWithModuleFile(t *testing.T) {
 
 			if testData.moduleName != "" {
 				moduleContents := fmt.Sprintf("module %s\n\ngo 1.19\n", testData.moduleName)
-				err := os.WriteFile(path.Join(directory, "go.mod"), []byte(moduleContents), 0644)
+				err := os.WriteFile(path.Join(directory, "go.mod"), []byte(moduleContents), 0o600)
 				fatalIf(t, err)
 			}
 
@@ -208,12 +211,12 @@ func TestBump_ReturnsExpectedVersionWithModuleFileInADifferentDirectory(t *testi
 			repo := setupRepo(t, directory, testData.existing)
 
 			module := path.Join(t.TempDir(), "module")
-			err := os.Mkdir(module, 0755)
+			err := os.Mkdir(module, 0o755)
 			fatalIf(t, err)
 
 			if testData.moduleName != "" {
 				moduleContents := fmt.Sprintf("module %s\n\ngo 1.19\n", testData.moduleName)
-				err := os.WriteFile(path.Join(module, "go.mod"), []byte(moduleContents), 0644)
+				err := os.WriteFile(path.Join(module, "go.mod"), []byte(moduleContents), 0o600)
 				fatalIf(t, err)
 			}
 
@@ -324,12 +327,12 @@ func TestBump_ReturnsExpectedVersionWithModuleFileAndPrefix(t *testing.T) {
 			repo := setupRepo(t, directory, testData.existing)
 
 			module := path.Join(t.TempDir(), "module")
-			err := os.Mkdir(module, 0755)
+			err := os.Mkdir(module, 0o755)
 			fatalIf(t, err)
 
 			if testData.moduleName != "" {
 				moduleContents := fmt.Sprintf("module %s\n\ngo 1.19\n", testData.moduleName)
-				err := os.WriteFile(path.Join(module, "go.mod"), []byte(moduleContents), 0644)
+				err := os.WriteFile(path.Join(module, "go.mod"), []byte(moduleContents), 0o600)
 				fatalIf(t, err)
 			}
 
@@ -362,12 +365,12 @@ func TestBump_PushesToRemoteCorrectly(t *testing.T) {
 
 	remoteDirectory := path.Join(t.TempDir(), "remote")
 	remoteRepo := setupRepo(t, remoteDirectory, []string{"v5.0.0", "v5.0.1"})
-	err := os.WriteFile(path.Join(remoteDirectory, "go.mod"), []byte(moduleContents), 0644)
+	err := os.WriteFile(path.Join(remoteDirectory, "go.mod"), []byte(moduleContents), 0o600)
 	fatalIf(t, err)
 
 	localDirectory := path.Join(t.TempDir(), "local")
 	localRepo := setupRepo(t, localDirectory, []string{"v5.0.0", "v5.0.1"})
-	err = os.WriteFile(path.Join(localDirectory, "go.mod"), []byte(moduleContents), 0644)
+	err = os.WriteFile(path.Join(localDirectory, "go.mod"), []byte(moduleContents), 0o600)
 	fatalIf(t, err)
 
 	remoteConfig := &config.RemoteConfig{
