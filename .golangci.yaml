@@ -9,6 +9,13 @@ issues:
         - bodyclose
 
 linters-settings:
+  gocritic:
+    disabled-checks:
+      - "paramTypeCombine"
+    enabled-tags:
+      - "performance"
+      - "style"
+      - "diagnostic"
   nlreturn:
     # Allow 2 lines max to have a return statement without a new line before it
     block-size: 3
