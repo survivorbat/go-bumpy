@@ -12,13 +12,17 @@ It is also capable of pushing the new tag to your remote repository.
 
 ## ⬇️ Installation
 
-`go install github.com/survivorbat/go-bumpy/cmd/bumpy@latest`
+```bash
+go install github.com/survivorbat/go-bumpy/cmd/bumpy@latest`
+```
 
 Or check out the [releases](https://github.com/survivorbat/go-bumpy/releases).
 
 ## 📋 Usage
 
-`bumpy [-minor] [-prefix="something/"] [-module="./src"] [-push="origin"] <repository directory>`
+```bash
+bumpy [-minor] [-prefix="something/"] [-module="./src"] [-push="origin"] <repository directory>
+```
 
 It will output the new tag name to stdout and logging to stderr.
 
@@ -32,7 +36,7 @@ It will output the new tag name to stdout and logging to stderr.
 ### Examples
 
 | Module Suffix | Latest Tag | Output |
-|---------------|------------|--------|
+| ------------- | ---------- | ------ |
 | None          | None       | v0.0.0 |
 | None          | v2.5.0     | v2.5.1 |
 | v3            | None       | v3.0.0 |
